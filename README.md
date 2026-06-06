@@ -15,11 +15,7 @@
 
 ## 🎬 Demo
 
-<p align="center">
-  <video src="https://github.com/mannubaveja007/Oria/raw/main/demo.mp4" width="300" controls></video>
-</p>
-
-> **Tip:** If the video doesn't play inline, [click here to download and watch it](demo.mp4).
+https://github.com/mannubaveja007/Oria/raw/main/demo.mp4
 
 ---
 
