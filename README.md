@@ -1,100 +1,85 @@
-# Oria ✦ Celestial Guide & Astrology Matcher
+# <p align="center"><font face="Cormorant Garamond">✦ O R I A ✦</font><br><sub>*Your Celestial Companion in the Palms of Your Hands*</sub></p>
 
-Oria is a premium, moon-inspired React Native Expo iOS application built to serve as a celestial guide and astrology reader matcher. The app features a dark, minimalist luxury editorial design with sleek typography, subtle ambient glows, and rhythmic chat reveals.
-
----
-
-## ✦ Core Features
-
-1. **Celestial Welcome Screen**: Dark canvas featuring a memoized stars field with blinking animations and a layered cyan moon glow backdrop.
-2. **Seamless Authentication**: Minimalist email/password signup and sign-in flow powered by Supabase.
-3. **Interactive Chat Onboarding**: A conversational setup flow guiding the user to enter their name, birthdate, birth time, and location, complete with smooth slide-up reveal animations and a realistic portrait of their guide, Mira.
-4. **Premium 7-Day Trial Paywall**: A timeline explainer showing trial progression with custom iOS glow drop shadows.
-5. **Daily Horoscope Dashboard**: Displaying personalized daily guidance, reflection quotes, zodiac details grid, and a subtle backdrop halo glow behind the zodiac glyph.
-6. **Celestial Guides Matcher**: Match and select specialized guides (Mira, Kabir, Anaya, Rhea) using high-quality realistic portraits.
-7. **Pulsing Radar Call Request**: Ripple wave animation representing call pending states, automatically transitioning to a call-accepted state that links to an video room.
-8. **Sign Out & Back Navigation**: Fixed header bars for easy account logout and cross-screen navigation.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-iOS%20%2F%20Android-blueviolet?style=for-the-badge&logo=apple" alt="Platform Supported" />
+  <img src="https://img.shields.io/badge/Made%20With-Expo%20%2F%20React%20Native-black?style=for-the-badge&logo=react" alt="Made With React Native" />
+  <img src="https://img.shields.io/badge/Database-Supabase-green?style=for-the-badge&logo=supabase" alt="Database Supabase" />
+</p>
 
 ---
 
-## ✦ Tech Stack
+## 🔮 See Oria in Action
 
-*   **Framework**: [Expo SDK 51](https://expo.dev/) (React Native) with [Expo Router](https://docs.expo.dev/router/introduction/) (file-based navigation).
-*   **Backend**: [Supabase](https://supabase.com/) for authentication and profile database persistence.
-*   **Styling**: Vanilla React Native stylesheet tokens supporting premium continuous curves (`borderCurve: 'continuous'`).
-*   **Typography**: Cormorant Garamond (editorial serif) and DM Sans (clean geometric sans-serif) via Expo Google Fonts.
-*   **Animations**: Built-in high-performance React Native `Animated` loops and transitions.
+Here is a quick video tour of Oria, showcasing the new bottom tabs navigation, the guides marketplace, and the celestial AI Ask screen running on an iPhone simulator.
+
+<p align="center">
+  <video src="demo.mov" width="320" autoplay loop muted controls style="border-radius: 20px; border: 1px solid #1E1E1E; box-shadow: 0 10px 30px rgba(0,0,0,0.8);"></video>
+</p>
 
 ---
 
-## ✦ Getting Started
+## 🌌 What is Oria?
 
-### 1. Prerequisites
-Ensure you have the following installed on your machine:
-*   [Node.js](https://nodejs.org/) (v18 or higher)
-*   [Git](https://git-scm.com/)
-*   iOS Simulator (via Xcode) or the [Expo Go](https://expo.dev/client) app on your physical iPhone
+**Oria** is a premium, moon-inspired spiritual guide application. Designed for seekers of cosmic guidance, it merges modern mobile design with ancient astrological wisdom. 
 
-### 2. Installation
-Clone the repository and install dependencies:
+Whether you are looking for your daily horoscope, wanting to converse with our custom cosmic AI, or wishing to book an advisor call with a real spiritual practitioner, Oria serves as your personal celestial guide.
+
+---
+
+## ✦ Key Features
+
+### 🌌 1. Celestial Space
+A stunning welcome screen with low-intensity breathing moon glow backdrop and a high-performance blinking stars field.
+
+### 💬 2. Conversational Onboarding
+A warm, step-by-step chat guide that learns your birth date, birth time, and location to calculate your coordinates.
+
+### 📅 3. Daily Horoscope
+Your cosmic dashboard containing reflection quotes, zodiac details grid, and custom halo glow effects.
+
+### 🔮 4. Spiritual Guides Marketplace
+A beautifully-spaced two-column layout showing real guides, specialties, and real-time availability cards.
+
+### 📞 5. Pulsing Call Request
+Press to send a call request with active ripple animations, which transitions to a video-call invitation.
+
+### 🤖 6. Ask Oria (Cosmic AI)
+A celestial chat interface where Oria consults the stars to provide personalized guidance based on your zodiac sign.
+
+---
+
+## 🚀 Simple Getting Started Guide
+
+Follow these steps to launch Oria on your machine.
+
+### 1. Download & Install Dependencies
+Open your terminal and run:
 ```bash
 git clone https://github.com/mannubaveja007/Oria.git
 cd Oria
 npm install
 ```
 
-### 3. Environment Variables
-Create a `.env` file in the root directory and add your Supabase credentials:
+### 2. Connect Your Database
+Create a file named `.env` in the project root folder and insert your Supabase URL & Key:
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-### 4. Supabase SQL Schema
-Run the following script inside the **Supabase SQL Editor** to create the required `profiles` table and set up Row Level Security (RLS):
-
-```sql
--- Create profiles table
-create table public.profiles (
-  id uuid references auth.users on delete cascade not null primary key,
-  name text,
-  dob date,
-  birth_time time,
-  birth_city text,
-  zodiac_sign text,
-  goal text,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Enable RLS
-alter table public.profiles enable row level security;
-
--- Create Policies
-create policy "Users can view own profile" on public.profiles
-  for select using (auth.uid() = id);
-
-create policy "Users can insert/update own profile" on public.profiles
-  for all using (auth.uid() = id) with check (auth.uid() = id);
-```
-
-### 5. Running the Application
-Start the Metro development server:
+### 3. Run the App
+Start Oria's server:
 ```bash
 npx expo start --ios
 ```
-*   Press **`i`** to open the app on your iOS Simulator.
-*   Scan the QR code with your camera app to load it in **Expo Go** on a physical iPhone.
+*   Press **`i`** to boot up the **iOS Simulator**.
+*   Alternatively, scan the QR code using your physical iPhone camera to open the app directly inside the **Expo Go** application.
 
 ---
 
-## ✦ Architecture & Design Token System
-
-To maintain visual excellence, the application uses a strict token and spacing system:
-*   **Canvas**: Solid black (`#000000`)
-*   **Surfaces & Cards**: Graphite dark gray (`#0A0A0A`)
-*   **Borders**: Thin dark borders (`#1E1E1E` or `#161616`)
-*   **Accent Glow**: Soft celestial cyan (`#C8E6FF`)
-*   **Continuous Curves**: All buttons and cards enforce `borderCurve: 'continuous'` with unified radii (`16` for cards, `28` for primary buttons).
-*   **Typography Hierarchy**:
-    *   *Display Serif*: `CormorantGaramond-Regular` / `Bold` (used for large headers and zodiac glyphs)
-    *   *Body / UI*: `DMSans-Regular` / `Medium` / `Bold` (used for form fields, uppercase tags, and secondary action items)
+## 🎨 Design Philosophy & Colors
+Oria is crafted to feel like a premium, luxury wellness editorial:
+*   **Background Canvas**: Absolute Pitch Black (`#000000`)
+*   **Card Surfaces**: Dark Obsidian (`#0A0A0A`)
+*   **Accents**: Glowing Celestial Cyan (`#C8E6FF`)
+*   **Typography**: *Cormorant Garamond* (Serif elegance) combined with *DM Sans* (Clean, modern reading)
