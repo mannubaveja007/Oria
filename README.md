@@ -13,7 +13,7 @@
 Here is a quick video tour of Oria, showcasing the new bottom tabs navigation, the guides marketplace, and the celestial AI Ask screen running on an iPhone simulator.
 
 <p align="center">
-  <video src="demo.mov" width="320" autoplay loop muted controls style="border-radius: 20px; border: 1px solid #1E1E1E; box-shadow: 0 10px 30px rgba(0,0,0,0.8);"></video>
+  <video src="demo.mp4" width="320" autoplay loop muted controls style="border-radius: 20px; border: 1px solid #1E1E1E; box-shadow: 0 10px 30px rgba(0,0,0,0.8);"></video>
 </p>
 
 ---
