@@ -4,12 +4,25 @@ import { useRouter } from 'expo-router';
 import { useOnboarding } from '../context/OnboardingContext';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// Attempt to load haptics optionally
+let Haptics: any;
+try {
+  Haptics = require('expo-haptics');
+} catch (e) {}
+
+const triggerHaptic = () => {
+  if (Haptics && Haptics.impactAsync) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }
+};
+
 interface Star {
   id: number;
   top: DimensionValue;
   left: DimensionValue;
   size: number;
-  isBlinking: boolean;
+  isTwinkling: boolean;
+  twinkleIndex: number;
 }
 
 export default function SplashScreen() {
@@ -17,42 +30,120 @@ export default function SplashScreen() {
   const insets = useSafeAreaInsets();
   const { session, onboardingData, loading } = useOnboarding();
 
-  // Create a blinking animation for a premium atmospheric effect
-  const blinkAnim = useRef(new Animated.Value(0.4)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // 1. Twinkle animations for 10 selected stars
+  const twinkleAnims = useRef(
+    Array.from({ length: 10 }, () => new Animated.Value(Math.random() * 0.75 + 0.25))
+  ).current;
+
+  // 2. Glow breathing animation
+  const glowOpacityAnim = useRef(new Animated.Value(0.12)).current;
+
+  // 3. Logo, Subtitle, and CTA entrance animations
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoTranslateY = useRef(new Animated.Value(10)).current;
+  const subtitleOpacity = useRef(new Animated.Value(0)).current;
+  const subtitleTranslateY = useRef(new Animated.Value(6)).current;
+  const ctaOpacity = useRef(new Animated.Value(0)).current;
+  const ctaTranslateY = useRef(new Animated.Value(12)).current;
+
+  // 4. CTA Scale feedback animation
+  const ctaScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Start star twinkling loop
+    twinkleAnims.forEach((anim) => {
+      const duration = 1200 + Math.random() * 1200;
+      const delay = Math.random() * 2000;
+      
+      const runTwinkle = () => {
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(anim, {
+            toValue: 0.25,
+            duration: duration,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 1.0,
+            duration: duration,
+            useNativeDriver: true,
+          }),
+        ]).start(() => runTwinkle());
+      };
+      
+      runTwinkle();
+    });
+
+    // Start central moon glow breathing loop
     Animated.loop(
       Animated.sequence([
-        Animated.timing(blinkAnim, {
-          toValue: 1.0,
-          duration: 2000,
+        Animated.timing(glowOpacityAnim, {
+          toValue: 0.18,
+          duration: 2600,
           useNativeDriver: true,
         }),
-        Animated.timing(blinkAnim, {
-          toValue: 0.4,
-          duration: 2500,
+        Animated.timing(glowOpacityAnim, {
+          toValue: 0.12,
+          duration: 2600,
           useNativeDriver: true,
         }),
       ])
     ).start();
 
-    Animated.timing(fadeAnim, {
-      toValue: 1.0,
-      duration: 1500,
-      useNativeDriver: true,
-    }).start();
-  }, [blinkAnim, fadeAnim]);
+    // Trigger sequential entrance: Logo -> Subtitle -> CTA
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(logoOpacity, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoTranslateY, {
+          toValue: 0,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(200),
+      Animated.parallel([
+        Animated.timing(subtitleOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(subtitleTranslateY, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(150),
+      Animated.parallel([
+        Animated.timing(ctaOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ctaTranslateY, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [twinkleAnims, glowOpacityAnim, logoOpacity, logoTranslateY, subtitleOpacity, subtitleTranslateY, ctaOpacity, ctaTranslateY]);
 
-  // Generate sparse stars field once using useMemo to avoid jumping on re-renders
+  // Generate sparse stars field once
   const stars = useMemo<Star[]>(() => {
     const starArray: Star[] = [];
+    let twinkleCount = 0;
     for (let i = 0; i < 45; i++) {
       const top = Math.random() * 100;
       const left = Math.random() * 100;
       const size = Math.random() * 2 + 1; // 1px to 3px
-      const isBlinking = Math.random() > 0.4;
-      starArray.push({ id: i, top: `${top}%`, left: `${left}%`, size, isBlinking });
+      const isTwinkling = i < 10;
+      const twinkleIndex = isTwinkling ? twinkleCount++ : -1;
+      starArray.push({ id: i, top: `${top}%`, left: `${left}%`, size, isTwinkling, twinkleIndex });
     }
     return starArray;
   }, []);
@@ -63,7 +154,6 @@ export default function SplashScreen() {
     if (!session) {
       router.push('/auth');
     } else {
-      // If signed in, check if profile exists (meaning they completed onboarding)
       const hasProfile = onboardingData.name && onboardingData.dob && onboardingData.zodiacSign;
       if (hasProfile) {
         router.push('/horoscope');
@@ -88,7 +178,7 @@ export default function SplashScreen() {
                 width: star.size,
                 height: star.size,
                 borderRadius: star.size / 2,
-                opacity: star.isBlinking ? blinkAnim : 0.6,
+                opacity: star.isTwinkling ? twinkleAnims[star.twinkleIndex] : (star.id % 2 === 0 ? 0.5 : 0.3),
               },
             ]}
           />
@@ -96,41 +186,77 @@ export default function SplashScreen() {
       </View>
 
       {/* Layered Moon Glow behind the branding */}
-      <View style={styles.glowContainer}>
-        <View style={[styles.glowRing, { width: 420, height: 420, borderRadius: 210, opacity: 0.02 }]} />
-        <View style={[styles.glowRing, { width: 300, height: 300, borderRadius: 150, opacity: 0.04 }]} />
-        <View style={[styles.glowRing, { width: 200, height: 200, borderRadius: 100, opacity: 0.06 }]} />
-        <View style={[styles.glowRing, { width: 100, height: 100, borderRadius: 50, opacity: 0.09 }]} />
-      </View>
+      <Animated.View style={[styles.glowContainer, { opacity: glowOpacityAnim }]}>
+        <View style={[styles.glowRing, { width: 320, height: 320, borderRadius: 160, opacity: 0.15 }]} />
+        <View style={[styles.glowRing, { width: 240, height: 240, borderRadius: 120, opacity: 0.25 }]} />
+        <View style={[styles.glowRing, { width: 160, height: 160, borderRadius: 80, opacity: 0.35 }]} />
+        <View style={[styles.glowRing, { width: 80, height: 80, borderRadius: 40, opacity: 0.50 }]} />
+        {/* Large subtle crescent moon behind text */}
+        <Text style={styles.crescentGlyph}>☾</Text>
+      </Animated.View>
 
       {/* Centered Oria Branding */}
-      <View style={styles.logoContainer}>
+      <Animated.View style={[
+        styles.logoContainer,
+        {
+          opacity: logoOpacity,
+          transform: [{ translateY: logoTranslateY }]
+        }
+      ]}>
         <Text style={styles.logoText}>Oria</Text>
-        <Text style={styles.subtitleText}>YOUR CELESTIAL GUIDE</Text>
-      </View>
+        
+        <Animated.View style={{
+          opacity: subtitleOpacity,
+          transform: [{ translateY: subtitleTranslateY }],
+          alignItems: 'center'
+        }}>
+          <Text style={styles.subtitleText}>YOUR CELESTIAL GUIDE</Text>
+          
+          {/* Moon phase indicator */}
+          <Text style={styles.moonPhaseText}>🌒   🌓   ●   🌗   🌘</Text>
+        </Animated.View>
+      </Animated.View>
 
       {/* Bottom Actions */}
-      <View style={[styles.bottomContainer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
-        <Pressable 
-          onPress={handleContinue} 
-          style={({ pressed }) => [
-            styles.ctaButton,
-            pressed && styles.ctaButtonPressed,
-            loading && styles.ctaButtonDisabled
-          ]}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#000000" />
-          ) : (
-            <Text style={styles.ctaButtonText}>Continue</Text>
-          )}
-        </Pressable>
+      <Animated.View style={[
+        styles.bottomContainer, 
+        { 
+          paddingBottom: Math.max(insets.bottom, 24),
+          opacity: ctaOpacity,
+          transform: [{ translateY: ctaTranslateY }]
+        }
+      ]}>
+        <Animated.View style={{ transform: [{ scale: ctaScale }], width: '100%' }}>
+          <Pressable 
+            onPress={handleContinue} 
+            onPressIn={() => {
+              triggerHaptic();
+              Animated.spring(ctaScale, {
+                toValue: 0.97,
+                useNativeDriver: true,
+              }).start();
+            }}
+            onPressOut={() => {
+              Animated.spring(ctaScale, {
+                toValue: 1.0,
+                useNativeDriver: true,
+              }).start();
+            }}
+            style={styles.ctaButton}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#000000" />
+            ) : (
+              <Text style={styles.ctaButtonText}>Continue</Text>
+            )}
+          </Pressable>
+        </Animated.View>
 
         <Text style={styles.legalText} selectable>
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </Text>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -156,10 +282,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#C8E6FF',
   },
+  crescentGlyph: {
+    position: 'absolute',
+    fontFamily: 'CormorantGaramond-Regular',
+    fontSize: 140,
+    color: '#C8E6FF',
+    opacity: 0.05,
+    top: -30,
+    transform: [{ rotate: '-15deg' }],
+  },
   logoContainer: {
     alignItems: 'center',
     zIndex: 2,
-    marginTop: -40,
+    marginTop: -80,
   },
   logoText: {
     fontFamily: 'CormorantGaramond-Regular',
@@ -174,6 +309,15 @@ const styles = StyleSheet.create({
     color: '#777777',
     letterSpacing: 6,
     marginTop: 12,
+    textAlign: 'center',
+  },
+  moonPhaseText: {
+    fontFamily: 'DMSans-Medium',
+    fontSize: 10,
+    color: '#C8E6FF',
+    opacity: 0.35,
+    letterSpacing: 2,
+    marginTop: 16,
     textAlign: 'center',
   },
   bottomContainer: {
@@ -194,9 +338,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ctaButtonPressed: {
-    opacity: 0.95,
-  },
   ctaButtonDisabled: {
     opacity: 0.5,
   },
@@ -210,7 +351,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#555555',
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: 20,
     lineHeight: 16,
+    opacity: 0.8,
   },
 });
