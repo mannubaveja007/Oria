@@ -1,85 +1,168 @@
-# <p align="center"><font face="Cormorant Garamond">✦ O R I A ✦</font><br><sub>*Your Celestial Companion in the Palms of Your Hands*</sub></p>
+<div align="center">
+
+# ✦ Oria
+
+**Your celestial guide — astrology, spiritual advisors, and cosmic AI on your phone.**
+
+[![GitHub Stars](https://img.shields.io/github/stars/mannubaveja007/Oria?style=for-the-badge)](https://github.com/mannubaveja007/Oria/stargazers)
+[![Platform](https://img.shields.io/badge/Platform-iOS%20%2F%20Android-black?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev)
+[![Built With](https://img.shields.io/badge/Built%20With-React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev)
+[![Supabase](https://img.shields.io/badge/Auth-Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+
+</div>
+
+---
+
+## 🎬 Demo
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-iOS%20%2F%20Android-blueviolet?style=for-the-badge&logo=apple" alt="Platform Supported" />
-  <img src="https://img.shields.io/badge/Made%20With-Expo%20%2F%20React%20Native-black?style=for-the-badge&logo=react" alt="Made With React Native" />
-  <img src="https://img.shields.io/badge/Database-Supabase-green?style=for-the-badge&logo=supabase" alt="Database Supabase" />
+  <video src="https://github.com/mannubaveja007/Oria/raw/main/demo.mp4" width="300" controls></video>
 </p>
 
----
-
-## 🔮 See Oria in Action
-
-Here is a quick video tour of Oria, showcasing the new bottom tabs navigation, the guides marketplace, and the celestial AI Ask screen running on an iPhone simulator.
-
-<p align="center">
-  <video src="demo.mp4" width="320" autoplay loop muted controls style="border-radius: 20px; border: 1px solid #1E1E1E; box-shadow: 0 10px 30px rgba(0,0,0,0.8);"></video>
-</p>
+> **Tip:** If the video doesn't play inline, [click here to download and watch it](demo.mp4).
 
 ---
 
-## 🌌 What is Oria?
+## What is this?
 
-**Oria** is a premium, moon-inspired spiritual guide application. Designed for seekers of cosmic guidance, it merges modern mobile design with ancient astrological wisdom. 
+Oria is a premium mobile app that connects you with spiritual guides and personalized astrology. It calculates your zodiac profile from your birth details, delivers a daily horoscope dashboard, lets you browse and call real spiritual advisors, and includes a conversational AI that answers cosmic questions based on your sign.
 
-Whether you are looking for your daily horoscope, wanting to converse with our custom cosmic AI, or wishing to book an advisor call with a real spiritual practitioner, Oria serves as your personal celestial guide.
-
----
-
-## ✦ Key Features
-
-### 🌌 1. Celestial Space
-A stunning welcome screen with low-intensity breathing moon glow backdrop and a high-performance blinking stars field.
-
-### 💬 2. Conversational Onboarding
-A warm, step-by-step chat guide that learns your birth date, birth time, and location to calculate your coordinates.
-
-### 📅 3. Daily Horoscope
-Your cosmic dashboard containing reflection quotes, zodiac details grid, and custom halo glow effects.
-
-### 🔮 4. Spiritual Guides Marketplace
-A beautifully-spaced two-column layout showing real guides, specialties, and real-time availability cards.
-
-### 📞 5. Pulsing Call Request
-Press to send a call request with active ripple animations, which transitions to a video-call invitation.
-
-### 🤖 6. Ask Oria (Cosmic AI)
-A celestial chat interface where Oria consults the stars to provide personalized guidance based on your zodiac sign.
+The app runs on iPhone and Android using [Expo](https://expo.dev) and stores your profile securely with [Supabase](https://supabase.com).
 
 ---
 
-## 🚀 Simple Getting Started Guide
+## Quick Start
 
-Follow these steps to launch Oria on your machine.
+You need [Node.js](https://nodejs.org/) (v18+) and either an iPhone with [Expo Go](https://expo.dev/go) or the iOS Simulator via Xcode.
 
-### 1. Download & Install Dependencies
-Open your terminal and run:
 ```bash
+# 1. Clone and install
 git clone https://github.com/mannubaveja007/Oria.git
 cd Oria
 npm install
+
+# 2. Add your Supabase credentials
+cp .env.example .env   # then edit .env with your keys (see below)
+
+# 3. Run
+npx expo start --ios
 ```
 
-### 2. Connect Your Database
-Create a file named `.env` in the project root folder and insert your Supabase URL & Key:
+Scan the QR code with your iPhone camera to open in Expo Go, or press **`i`** to launch the iOS Simulator.
+
+### Supabase Setup
+
+Create a free project at [supabase.com](https://supabase.com), then add your credentials to `.env`:
+
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-### 3. Run the App
-Start Oria's server:
-```bash
-npx expo start --ios
+Run this SQL in the Supabase SQL Editor to create the required table:
+
+```sql
+create table public.profiles (
+  id uuid references auth.users on delete cascade not null primary key,
+  name text,
+  dob date,
+  birth_time time,
+  birth_city text,
+  zodiac_sign text,
+  goal text,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.profiles enable row level security;
+
+create policy "Users can view own profile" on public.profiles
+  for select using (auth.uid() = id);
+
+create policy "Users can insert/update own profile" on public.profiles
+  for all using (auth.uid() = id) with check (auth.uid() = id);
 ```
-*   Press **`i`** to boot up the **iOS Simulator**.
-*   Alternatively, scan the QR code using your physical iPhone camera to open the app directly inside the **Expo Go** application.
 
 ---
 
-## 🎨 Design Philosophy & Colors
-Oria is crafted to feel like a premium, luxury wellness editorial:
-*   **Background Canvas**: Absolute Pitch Black (`#000000`)
-*   **Card Surfaces**: Dark Obsidian (`#0A0A0A`)
-*   **Accents**: Glowing Celestial Cyan (`#C8E6FF`)
-*   **Typography**: *Cormorant Garamond* (Serif elegance) combined with *DM Sans* (Clean, modern reading)
+## Project Structure
+
+```
+app/                        # Screens (file-based routing via Expo Router)
+├── (tabs)/                 # Bottom tab navigation group
+│   ├── _layout.tsx         #   Tab bar config (icons, haptics, glow dot)
+│   ├── ask.tsx             #   Ask Oria — cosmic AI chat
+│   ├── horoscope.tsx       #   Daily horoscope dashboard
+│   ├── profile.tsx         #   Your birth profile + sign out
+│   └── readers.tsx         #   Spiritual guides marketplace (2-col grid)
+├── _layout.tsx             # Root stack navigator + font loading
+├── auth.tsx                # Email/password sign-in & sign-up
+├── call.tsx                # Pulsing call request + video call link
+├── index.tsx               # Celestial welcome / splash screen
+├── onboarding.tsx          # Conversational onboarding chat
+└── paywall.tsx             # 7-day trial paywall
+assets/                     # App icons and images
+components/
+└── CelestialBackground.tsx # Animated star field with constellations
+constants/
+├── readers.ts              # Guide profiles (names, photos, specialties)
+└── zodiacData.ts           # Zodiac sign metadata
+context/
+└── OnboardingContext.tsx    # Auth session + profile state provider
+lib/
+└── supabase.ts             # Supabase client initialization
+utils/
+├── haptics.ts              # Haptic feedback helpers
+└── zodiac.ts               # Zodiac calculation from birth date
+```
+
+---
+
+## Documentation
+
+| Resource | Description |
+|----------|-------------|
+| [App Screens](app/) | All screens — file names map directly to routes |
+| [Tab Navigation](app/(tabs)/_layout.tsx) | Bottom tab bar configuration and styling |
+| [Supabase Client](lib/supabase.ts) | Database and auth client setup |
+| [Onboarding Context](context/OnboardingContext.tsx) | Session management and profile data |
+| [Zodiac Data](constants/zodiacData.ts) | Sign metadata — glyphs, elements, date ranges |
+| [Readers](constants/readers.ts) | Spiritual guide profiles and availability |
+
+---
+
+## Architecture
+
+```mermaid
+graph LR
+    Splash["Splash Screen"] --> Auth["Auth (Supabase)"]
+    Auth --> Onboarding["Onboarding Chat"]
+    Onboarding --> Paywall["7-Day Trial"]
+    Paywall --> Tabs["Bottom Tabs"]
+
+    Tabs --> Home["☾ Horoscope"]
+    Tabs --> Guides["☍ Guides"]
+    Tabs --> Ask["✦ Ask Oria"]
+    Tabs --> Profile["◉ Profile"]
+
+    Guides --> Call["Video Call"]
+```
+
+---
+
+## Contributing
+
+Contributions are welcome. Fork the repo, create a branch, and open a pull request.
+
+<a href="https://github.com/mannubaveja007/Oria/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mannubaveja007/Oria" />
+</a>
+
+---
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=mannubaveja007/Oria&type=Date)](https://star-history.com/#mannubaveja007/Oria&Date)
+
+**If Oria resonates with you, consider giving it a ⭐**
+
+</div>
