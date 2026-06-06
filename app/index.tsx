@@ -4,18 +4,6 @@ import { useRouter } from 'expo-router';
 import { useOnboarding } from '../context/OnboardingContext';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Attempt to load haptics optionally
-let Haptics: any;
-try {
-  Haptics = require('expo-haptics');
-} catch (e) {}
-
-const triggerHaptic = () => {
-  if (Haptics && Haptics.impactAsync) {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-  }
-};
-
 interface Star {
   id: number;
   top: DimensionValue;
@@ -50,14 +38,13 @@ export default function SplashScreen() {
   const ctaScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Start star twinkling loop
-    twinkleAnims.forEach((anim) => {
+    // Start star twinkling loop with safe JS timeouts to avoid Animated.delay quirks
+    const timeouts = twinkleAnims.map((anim, idx) => {
       const duration = 1200 + Math.random() * 1200;
       const delay = Math.random() * 2000;
       
       const runTwinkle = () => {
         Animated.sequence([
-          Animated.delay(delay),
           Animated.timing(anim, {
             toValue: 0.25,
             duration: duration,
@@ -70,8 +57,8 @@ export default function SplashScreen() {
           }),
         ]).start(() => runTwinkle());
       };
-      
-      runTwinkle();
+
+      return setTimeout(runTwinkle, delay);
     });
 
     // Start central moon glow breathing loop
@@ -90,47 +77,51 @@ export default function SplashScreen() {
       ])
     ).start();
 
-    // Trigger sequential entrance: Logo -> Subtitle -> CTA
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 700,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoTranslateY, {
-          toValue: 0,
-          duration: 700,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.delay(200),
-      Animated.parallel([
-        Animated.timing(subtitleOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(subtitleTranslateY, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.delay(150),
-      Animated.parallel([
-        Animated.timing(ctaOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ctaTranslateY, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
+    // Trigger sequential entrance in parallel using built-in delay parameters
+    // This is 100% reliable with native driver on all React Native platforms
+    Animated.parallel([
+      // Logo Entrance (Starts immediately)
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 700,
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoTranslateY, {
+        toValue: 0,
+        duration: 700,
+        useNativeDriver: true,
+      }),
+      // Subtitle Entrance (Starts after 700ms logo + 200ms delay = 900ms)
+      Animated.timing(subtitleOpacity, {
+        toValue: 1,
+        duration: 500,
+        delay: 900,
+        useNativeDriver: true,
+      }),
+      Animated.timing(subtitleTranslateY, {
+        toValue: 0,
+        duration: 500,
+        delay: 900,
+        useNativeDriver: true,
+      }),
+      // CTA Entrance (Starts after 900ms + 500ms subtitle + 150ms delay = 1550ms)
+      Animated.timing(ctaOpacity, {
+        toValue: 1,
+        duration: 500,
+        delay: 1550,
+        useNativeDriver: true,
+      }),
+      Animated.timing(ctaTranslateY, {
+        toValue: 0,
+        duration: 500,
+        delay: 1550,
+        useNativeDriver: true,
+      }),
     ]).start();
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
   }, [twinkleAnims, glowOpacityAnim, logoOpacity, logoTranslateY, subtitleOpacity, subtitleTranslateY, ctaOpacity, ctaTranslateY]);
 
   // Generate sparse stars field once
@@ -230,7 +221,6 @@ export default function SplashScreen() {
           <Pressable 
             onPress={handleContinue} 
             onPressIn={() => {
-              triggerHaptic();
               Animated.spring(ctaScale, {
                 toValue: 0.97,
                 useNativeDriver: true,
