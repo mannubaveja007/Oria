@@ -62,7 +62,7 @@ export default function CelestialBackground({
 
   useEffect(() => {
     const loops = twinkleAnims.map((anim, i) => {
-      const duration = 600 + i * 150;
+      const duration = 250 + i * 80;
       return Animated.loop(
         Animated.sequence([
           Animated.timing(anim, {
@@ -91,12 +91,12 @@ export default function CelestialBackground({
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
-          Animated.timing(driftX, { toValue: 10, duration: 8000, useNativeDriver: true }),
-          Animated.timing(driftX, { toValue: 0, duration: 8000, useNativeDriver: true }),
+          Animated.timing(driftX, { toValue: 10, duration: 4000, useNativeDriver: true }),
+          Animated.timing(driftX, { toValue: 0, duration: 4000, useNativeDriver: true }),
         ]),
         Animated.sequence([
-          Animated.timing(driftY, { toValue: -8, duration: 8000, useNativeDriver: true }),
-          Animated.timing(driftY, { toValue: 0, duration: 8000, useNativeDriver: true }),
+          Animated.timing(driftY, { toValue: -8, duration: 4000, useNativeDriver: true }),
+          Animated.timing(driftY, { toValue: 0, duration: 4000, useNativeDriver: true }),
         ]),
       ])
     ).start();
@@ -125,35 +125,35 @@ export default function CelestialBackground({
         // 1. Fade in constellation node stars
         Animated.timing(constellationOpacity, {
           toValue: 0.8 * intensity,
-          duration: 1000,
+          duration: 400,
           useNativeDriver: true,
         }),
         // 2. Draw line segment 1
         Animated.timing(line1Opacity, {
           toValue: 0.5 * intensity,
-          duration: 500,
+          duration: 200,
           useNativeDriver: true,
         }),
         // 3. Draw line segment 2
         Animated.timing(line2Opacity, {
           toValue: 0.5 * intensity,
-          duration: 500,
+          duration: 200,
           useNativeDriver: true,
         }),
         // 4. Draw line segment 3
         Animated.timing(line3Opacity, {
           toValue: 0.5 * intensity,
-          duration: 500,
+          duration: 200,
           useNativeDriver: true,
         }),
         // 5. Hold constellation fully visible
-        Animated.delay(3000),
+        Animated.delay(1000),
         // 6. Fade out lines and nodes
         Animated.parallel([
-          Animated.timing(constellationOpacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
-          Animated.timing(line1Opacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
-          Animated.timing(line2Opacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
-          Animated.timing(line3Opacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
+          Animated.timing(constellationOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+          Animated.timing(line1Opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+          Animated.timing(line2Opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+          Animated.timing(line3Opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
         ]),
         // 7. Delay before next cycle starts
         Animated.delay(constellationDelay),
