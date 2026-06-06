@@ -24,6 +24,13 @@ export default function ReadersScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Back Button */}
+      <View style={styles.topBar}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back to horoscope</Text>
+        </Pressable>
+      </View>
+
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -226,5 +233,19 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Bold',
     fontSize: 14,
     color: '#000000',
+  },
+  topBar: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#111111',
+  },
+  backButton: {
+    paddingVertical: 6,
+  },
+  backButtonText: {
+    fontFamily: 'DMSans-Medium',
+    fontSize: 14,
+    color: '#8A8A8A',
   },
 });

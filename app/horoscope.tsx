@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOnboarding } from '../context/OnboardingContext';
 import { getZodiacSign } from '../utils/zodiac';
 import { zodiacData } from '../constants/zodiacData';
+import { supabase } from '../lib/supabase';
 
 export default function HoroscopeScreen() {
   const router = useRouter();
@@ -45,8 +46,25 @@ export default function HoroscopeScreen() {
     router.push('/readers');
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.replace('/auth');
+    } catch (e) {
+      console.error("Sign out error:", e);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Top Bar with Sign Out */}
+      <View style={styles.topBar}>
+        <Text style={styles.brandText}>Oria</Text>
+        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
+      </View>
+
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -261,5 +279,32 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Bold',
     fontSize: 16,
     color: '#000000',
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderColor: '#111111',
+  },
+  brandText: {
+    fontFamily: 'CormorantGaramond-Regular',
+    fontSize: 24,
+    color: '#FFFFFF',
+  },
+  signOutButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#0A0A0A',
+    borderWidth: 1,
+    borderColor: '#1E1E1E',
+  },
+  signOutText: {
+    fontFamily: 'DMSans-Medium',
+    fontSize: 12,
+    color: '#8A8A8A',
   },
 });
