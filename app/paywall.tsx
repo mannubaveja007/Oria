@@ -142,7 +142,7 @@ export default function PaywallScreen() {
       Animated.timing(ctaTranslateY, { toValue: -15, duration: 250, useNativeDriver: true }),
       Animated.timing(glowOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
     ]).start(() => {
-      router.push('/horoscope');
+      router.push('/(tabs)/horoscope');
     });
   };
 

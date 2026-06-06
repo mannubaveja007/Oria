@@ -79,8 +79,7 @@ export default function RootLayout() {
         <Stack.Screen name="auth" />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="paywall" />
-        <Stack.Screen name="horoscope" />
-        <Stack.Screen name="readers" />
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="call" />
       </Stack>
     </OnboardingProvider>

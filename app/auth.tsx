@@ -57,7 +57,7 @@ export default function AuthScreen() {
         if (data.session) {
           const profileExists = await loadProfile(data.session.user.id);
           if (profileExists) {
-            router.replace('/horoscope');
+            router.replace('/(tabs)/horoscope');
           } else {
             router.replace('/onboarding');
           }

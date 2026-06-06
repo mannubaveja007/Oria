@@ -124,7 +124,7 @@ export default function SplashScreen() {
       } else {
         const hasProfile = onboardingData.name && onboardingData.dob && onboardingData.zodiacSign;
         if (hasProfile) {
-          router.push('/horoscope');
+          router.push('/(tabs)/horoscope');
         } else {
           router.push('/onboarding');
         }

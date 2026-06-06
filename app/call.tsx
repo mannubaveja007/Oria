@@ -112,7 +112,7 @@ export default function CallScreen() {
           {/* Central Avatar */}
           <View style={[styles.avatarCircle, accepted && styles.avatarCircleAccepted]}>
             <Image 
-              source={avatarImages[reader.id]} 
+              source={reader.image ? { uri: reader.image } : (avatarImages[reader.id] || avatarImages[1])} 
               style={styles.avatarImage} 
               contentFit="cover"
             />

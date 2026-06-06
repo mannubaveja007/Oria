@@ -1,21 +1,19 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Animated, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { useOnboarding } from '../context/OnboardingContext';
-import { getZodiacSign } from '../utils/zodiac';
-import { zodiacData } from '../constants/zodiacData';
-import { supabase } from '../lib/supabase';
-import { triggerLight, triggerMedium, triggerSuccess } from '../utils/haptics';
-import { readers } from '../constants/readers';
-import CelestialBackground from '../components/CelestialBackground';
+import { useOnboarding } from '../../context/OnboardingContext';
+import { getZodiacSign } from '../../utils/zodiac';
+import { zodiacData } from '../../constants/zodiacData';
+import { triggerLight, triggerMedium } from '../../utils/haptics';
+import CelestialBackground from '../../components/CelestialBackground';
 
 const avatarImages: Record<number, any> = {
-  1: require('../assets/images/mira.png'),
-  2: require('../assets/images/kabir.png'),
-  3: require('../assets/images/anaya.png'),
-  4: require('../assets/images/rhea.png'),
+  1: require('../../assets/images/mira.png'),
+  2: require('../../assets/images/kabir.png'),
+  3: require('../../assets/images/anaya.png'),
+  4: require('../../assets/images/rhea.png'),
 };
 
 export default function HoroscopeScreen() {
@@ -25,12 +23,6 @@ export default function HoroscopeScreen() {
   // Save/Saved Reflection State
   const [isSaved, setIsSaved] = useState(false);
   const savePulse = useRef(new Animated.Value(1)).current;
-
-  // Ask Oria Modal States
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [answer, setAnswer] = useState("");
 
   // Staggered Entrance Animation Refs
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -52,7 +44,6 @@ export default function HoroscopeScreen() {
   const askOriaScale = useRef(new Animated.Value(1)).current;
   const saveScale = useRef(new Animated.Value(1)).current;
   const viewReadersScale = useRef(new Animated.Value(1)).current;
-  const signOutScale = useRef(new Animated.Value(1)).current;
 
   // Retrieve or recalculate zodiac metrics based on context
   const resolvedSign = useMemo(() => {
@@ -123,19 +114,14 @@ export default function HoroscopeScreen() {
     ]).start();
   }, []);
 
-  const handleContinue = () => {
+  const handleGoToGuides = () => {
     triggerLight();
-    router.push('/readers');
+    router.push('/(tabs)/readers');
   };
 
-  const handleSignOut = async () => {
-    triggerMedium();
-    try {
-      await supabase.auth.signOut();
-      router.replace('/auth');
-    } catch (e) {
-      console.error("Sign out error:", e);
-    }
+  const handleGoToAsk = () => {
+    triggerLight();
+    router.push('/(tabs)/ask');
   };
 
   const handleSaveToggle = () => {
@@ -150,50 +136,13 @@ export default function HoroscopeScreen() {
     ]).start();
   };
 
-  const handleAskOria = () => {
-    triggerLight();
-    setIsModalVisible(true);
-    setQuestion("");
-    setAnswer("");
-  };
-
-  const handleQuestionSubmit = () => {
-    if (!question.trim()) return;
-    triggerMedium();
-    setIsSubmitting(true);
-    setAnswer("");
-
-    // Simulate astronomical response delay
-    setTimeout(() => {
-      triggerSuccess();
-      setIsSubmitting(false);
-      setAnswer(
-        `Oria has aligned with your inquiry. Regarding "${question}", the current celestial alignments for your sign, ${resolvedSign.sign}, show a path of deep growth. As a ${resolvedSign.element} sign, trust your inner intuition to guide your actions through this current cosmic transit.`
-      );
-    }, 1500);
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <CelestialBackground density="low" showConstellation={true} intensity={0.35} constellationDelay={200} />
+      
       {/* Top Header Navigation */}
       <View style={styles.topBar}>
         <Text style={styles.brandText}>Oria</Text>
-        <Animated.View style={{ transform: [{ scale: signOutScale }] }}>
-          <Pressable 
-            onPress={handleSignOut} 
-            onPressIn={() => {
-              triggerLight();
-              Animated.spring(signOutScale, { toValue: 0.97, useNativeDriver: true }).start();
-            }}
-            onPressOut={() => {
-              Animated.spring(signOutScale, { toValue: 1.0, useNativeDriver: true }).start();
-            }}
-            style={styles.signOutButton}
-          >
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </Pressable>
-        </Animated.View>
       </View>
 
       <ScrollView 
@@ -232,10 +181,10 @@ export default function HoroscopeScreen() {
           <Text style={styles.guidanceLabel}>TODAY'S GUIDANCE</Text>
           <Text style={styles.guidanceBody} selectable>{resolvedSign.guidance}</Text>
           
-          {/* Ask Oria CTA */}
+          {/* Ask Oria CTA (Redirects to Ask Tab) */}
           <Animated.View style={[styles.askOriaContainer, { transform: [{ scale: askOriaScale }] }]}>
             <Pressable
-              onPress={handleAskOria}
+              onPress={handleGoToAsk}
               onPressIn={() => {
                 triggerLight();
                 Animated.spring(askOriaScale, { toValue: 0.97, useNativeDriver: true }).start();
@@ -342,7 +291,7 @@ export default function HoroscopeScreen() {
             {/* View Readers Button */}
             <Animated.View style={{ transform: [{ scale: viewReadersScale }] }}>
               <Pressable
-                onPress={handleContinue}
+                onPress={handleGoToGuides}
                 onPressIn={() => {
                   triggerLight();
                   Animated.spring(viewReadersScale, { toValue: 0.97, useNativeDriver: true }).start();
@@ -358,78 +307,6 @@ export default function HoroscopeScreen() {
           </View>
         </Animated.View>
       </ScrollView>
-
-      {/* Ask Oria Slide-up Bottom Sheet Modal */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsModalVisible(false)} />
-          <View style={styles.modalContent}>
-            {/* Handle bar */}
-            <View style={styles.handleBar} />
-
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ask Oria</Text>
-              <Pressable onPress={() => setIsModalVisible(false)} style={styles.modalCloseIconWrapper}>
-                <Text style={styles.modalCloseIcon}>×</Text>
-              </Pressable>
-            </View>
-
-            {!answer && !isSubmitting ? (
-              <>
-                <Text style={styles.modalPromptText}>
-                  Ask Oria anything about your celestial path or today's energy alignment.
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="What lies in my cosmic path today?"
-                  placeholderTextColor="#444444"
-                  multiline
-                  numberOfLines={3}
-                  value={question}
-                  onChangeText={setQuestion}
-                  maxLength={150}
-                  autoFocus
-                />
-                <View style={styles.modalActionRow}>
-                  <Pressable 
-                    onPress={handleQuestionSubmit}
-                    disabled={!question.trim()}
-                    style={[styles.modalSubmitBtn, !question.trim() && styles.modalSubmitBtnDisabled]}
-                  >
-                    <Text style={styles.modalSubmitBtnText}>Send to Cosmos</Text>
-                  </Pressable>
-                </View>
-              </>
-            ) : isSubmitting ? (
-              <View style={styles.loaderContainer}>
-                <ActivityIndicator size="small" color="#C8E6FF" />
-                <Text style={styles.loaderText}>Consulting the celestial bodies...</Text>
-              </View>
-            ) : (
-              <ScrollView style={styles.answerScroll} contentContainerStyle={styles.answerScrollContent}>
-                <Text style={styles.questionQuote}>"{question}"</Text>
-                <Text style={styles.answerBodyText} selectable>{answer}</Text>
-                
-                <Pressable 
-                  onPress={() => {
-                    triggerLight();
-                    setQuestion("");
-                    setAnswer("");
-                  }} 
-                  style={styles.askAnotherBtn}
-                >
-                  <Text style={styles.askAnotherBtnText}>Ask another question</Text>
-                </Pressable>
-              </ScrollView>
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -454,27 +331,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -0.5,
   },
-  signOutButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#0A0A0A',
-    borderWidth: 1,
-    borderColor: '#1E1E1E',
-    borderCurve: 'continuous',
-  },
-  signOutText: {
-    fontFamily: 'DMSans-Medium',
-    fontSize: 12,
-    color: '#8A8A8A',
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 36,
+    paddingBottom: 110, // Added padding so it doesn't get obscured by bottom tabs
     gap: 16,
   },
   headerSection: {
@@ -582,7 +445,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#0E0E0E',
     borderWidth: 1,
-    borderColor: '#222222',
+    borderColor: '#222',
     borderRadius: 28,
     paddingVertical: 14,
     alignItems: 'center',
@@ -739,137 +602,5 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Bold',
     fontSize: 12,
     color: '#000000',
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.82)',
-  },
-  modalContent: {
-    backgroundColor: '#0A0A0A',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderWidth: 1,
-    borderColor: '#1D1D1D',
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  handleBar: {
-    width: 40,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: '#222',
-    alignSelf: 'center',
-    marginBottom: 8,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontFamily: 'CormorantGaramond-Regular',
-    fontSize: 26,
-    color: '#FFFFFF',
-  },
-  modalCloseIconWrapper: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#141414',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalCloseIcon: {
-    fontSize: 18,
-    color: '#8A8A8A',
-    marginTop: -2,
-  },
-  modalPromptText: {
-    fontFamily: 'DMSans-Regular',
-    fontSize: 14,
-    color: '#8A8A8A',
-    lineHeight: 20,
-  },
-  input: {
-    backgroundColor: '#050505',
-    borderWidth: 1,
-    borderColor: '#1A1A1A',
-    borderRadius: 12,
-    padding: 14,
-    color: '#FFFFFF',
-    fontFamily: 'DMSans-Regular',
-    fontSize: 15,
-    minHeight: 90,
-    textAlignVertical: 'top',
-  },
-  modalActionRow: {
-    marginTop: 8,
-    width: '100%',
-  },
-  modalSubmitBtn: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderCurve: 'continuous',
-  },
-  modalSubmitBtnDisabled: {
-    opacity: 0.4,
-  },
-  modalSubmitBtnText: {
-    fontFamily: 'DMSans-Bold',
-    fontSize: 14,
-    color: '#000000',
-  },
-  loaderContainer: {
-    paddingVertical: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  loaderText: {
-    fontFamily: 'DMSans-Regular',
-    fontSize: 13,
-    color: '#777777',
-  },
-  answerScroll: {
-    maxHeight: 280,
-  },
-  answerScrollContent: {
-    gap: 14,
-    paddingVertical: 4,
-  },
-  questionQuote: {
-    fontFamily: 'DMSans-Italic',
-    fontSize: 14,
-    color: '#555555',
-  },
-  answerBodyText: {
-    fontFamily: 'DMSans-Regular',
-    fontSize: 15,
-    color: '#8A8A8A',
-    lineHeight: 24,
-  },
-  askAnotherBtn: {
-    backgroundColor: '#0E0E0E',
-    borderWidth: 1,
-    borderColor: '#1E1E1E',
-    borderRadius: 20,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  askAnotherBtnText: {
-    fontFamily: 'DMSans-Bold',
-    fontSize: 12,
-    color: '#C8E6FF',
   },
 });
