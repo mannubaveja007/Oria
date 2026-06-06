@@ -15,7 +15,13 @@
 
 ## 🎬 Demo
 
-https://github.com/mannubaveja007/Oria/raw/main/demo.mp4
+<p align="center">
+  <a href="https://youtube.com/shorts/mMWee0jc3vM">
+    <img src="https://img.youtube.com/vi/mMWee0jc3vM/0.jpg" alt="Oria Demo on YouTube" width="300" />
+  </a>
+  <br />
+  <sub>▶️ <strong>Tap the image to watch the full demo on YouTube</strong></sub>
+</p>
 
 ---
 
