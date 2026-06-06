@@ -12,6 +12,11 @@ import {
   DMSans_500Medium, 
   DMSans_700Bold 
 } from '@expo-google-fonts/dm-sans';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_700Bold
+} from '@expo-google-fonts/inter';
 import { OnboardingProvider } from '../context/OnboardingContext';
 import * as SplashScreen from 'expo-splash-screen';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -29,6 +34,9 @@ export default function RootLayout() {
     'DMSans-Regular': DMSans_400Regular,
     'DMSans-Medium': DMSans_500Medium,
     'DMSans-Bold': DMSans_700Bold,
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-Bold': Inter_700Bold,
   });
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import { Image } from 'expo-image';
 import { useOnboarding } from '../context/OnboardingContext';
 import { getZodiacSign } from '../utils/zodiac';
 import { supabase } from '../lib/supabase';
+import CelestialBackground from '../components/CelestialBackground';
 
 interface Message {
   id: string;
@@ -234,6 +235,7 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <CelestialBackground density="medium" showConstellation={false} intensity={0.45} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}

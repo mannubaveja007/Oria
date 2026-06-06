@@ -1,32 +1,20 @@
-import React, { useMemo, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Pressable, Animated, ActivityIndicator, DimensionValue } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Pressable, Animated, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../context/OnboardingContext';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-
-interface Star {
-  id: number;
-  top: DimensionValue;
-  left: DimensionValue;
-  size: number;
-  isTwinkling: boolean;
-  twinkleIndex: number;
-}
+import CelestialBackground from '../components/CelestialBackground';
+import { triggerLight } from '../utils/haptics';
 
 export default function SplashScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { session, onboardingData, loading } = useOnboarding();
 
-  // 1. Twinkle animations for 10 selected stars
-  const twinkleAnims = useRef(
-    Array.from({ length: 10 }, () => new Animated.Value(Math.random() * 0.75 + 0.25))
-  ).current;
-
-  // 2. Glow breathing animation
+  // 1. Glow breathing animation
   const glowOpacityAnim = useRef(new Animated.Value(0.12)).current;
 
-  // 3. Logo, Subtitle, and CTA entrance animations
+  // 2. Logo, Subtitle, and CTA entrance animations
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoTranslateY = useRef(new Animated.Value(10)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
@@ -34,33 +22,10 @@ export default function SplashScreen() {
   const ctaOpacity = useRef(new Animated.Value(0)).current;
   const ctaTranslateY = useRef(new Animated.Value(12)).current;
 
-  // 4. CTA Scale feedback animation
+  // 3. CTA Scale feedback animation
   const ctaScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Start star twinkling loop with safe JS timeouts to avoid Animated.delay quirks
-    const timeouts = twinkleAnims.map((anim, idx) => {
-      const duration = 1200 + Math.random() * 1200;
-      const delay = Math.random() * 2000;
-      
-      const runTwinkle = () => {
-        Animated.sequence([
-          Animated.timing(anim, {
-            toValue: 0.25,
-            duration: duration,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: 1.0,
-            duration: duration,
-            useNativeDriver: true,
-          }),
-        ]).start(() => runTwinkle());
-      };
-
-      return setTimeout(runTwinkle, delay);
-    });
-
     // Start central moon glow breathing loop
     Animated.loop(
       Animated.sequence([
@@ -118,29 +83,13 @@ export default function SplashScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [twinkleAnims, glowOpacityAnim, logoOpacity, logoTranslateY, subtitleOpacity, subtitleTranslateY, ctaOpacity, ctaTranslateY]);
-
-  // Generate sparse stars field once
-  const stars = useMemo<Star[]>(() => {
-    const starArray: Star[] = [];
-    let twinkleCount = 0;
-    for (let i = 0; i < 45; i++) {
-      const top = Math.random() * 100;
-      const left = Math.random() * 100;
-      const size = Math.random() * 2 + 1; // 1px to 3px
-      const isTwinkling = i < 10;
-      const twinkleIndex = isTwinkling ? twinkleCount++ : -1;
-      starArray.push({ id: i, top: `${top}%`, left: `${left}%`, size, isTwinkling, twinkleIndex });
-    }
-    return starArray;
-  }, []);
+  }, [glowOpacityAnim, logoOpacity, logoTranslateY, subtitleOpacity, subtitleTranslateY, ctaOpacity, ctaTranslateY]);
 
   const handleContinue = () => {
     if (loading) return;
+
+    // Trigger light haptic feedback
+    triggerLight();
 
     // Trigger elegant exit animations before routing
     Animated.parallel([
@@ -185,25 +134,9 @@ export default function SplashScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Background Star Field */}
-      <View style={StyleSheet.absoluteFill}>
-        {stars.map((star) => (
-          <Animated.View
-            key={star.id}
-            style={[
-              styles.star,
-              {
-                top: star.top,
-                left: star.left,
-                width: star.size,
-                height: star.size,
-                borderRadius: star.size / 2,
-                opacity: star.isTwinkling ? twinkleAnims[star.twinkleIndex] : (star.id % 2 === 0 ? 0.5 : 0.3),
-              },
-            ]}
-          />
-        ))}
-      </View>
+      {/* Background Star Field with Parallax Drift and Constellations */}
+      <CelestialBackground density="high" showConstellation={true} intensity={1.0} />
+
 
       {/* Layered Moon Glow behind the branding */}
       <Animated.View style={[styles.glowContainer, { opacity: glowOpacityAnim }]}>
@@ -233,7 +166,7 @@ export default function SplashScreen() {
           <Text style={styles.subtitleText}>YOUR CELESTIAL GUIDE</Text>
           
           {/* Moon phase indicator */}
-          <Text style={styles.moonPhaseText}>🌒   🌓   ●   🌗   🌘</Text>
+          <Text style={styles.moonPhaseText}>☾   ◐   ●   ◑   ☽</Text>
         </Animated.View>
       </Animated.View>
 
@@ -334,7 +267,7 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Medium',
     fontSize: 10,
     color: '#C8E6FF',
-    opacity: 0.35,
+    opacity: 0.25,
     letterSpacing: 2,
     marginTop: 16,
     textAlign: 'center',
