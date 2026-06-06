@@ -142,16 +142,45 @@ export default function SplashScreen() {
   const handleContinue = () => {
     if (loading) return;
 
-    if (!session) {
-      router.push('/auth');
-    } else {
-      const hasProfile = onboardingData.name && onboardingData.dob && onboardingData.zodiacSign;
-      if (hasProfile) {
-        router.push('/horoscope');
+    // Trigger elegant exit animations before routing
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoTranslateY, {
+        toValue: -15,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(subtitleOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(ctaOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(glowOpacityAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      if (!session) {
+        router.push('/auth');
       } else {
-        router.push('/onboarding');
+        const hasProfile = onboardingData.name && onboardingData.dob && onboardingData.zodiacSign;
+        if (hasProfile) {
+          router.push('/horoscope');
+        } else {
+          router.push('/onboarding');
+        }
       }
-    }
+    });
   };
 
   return (
