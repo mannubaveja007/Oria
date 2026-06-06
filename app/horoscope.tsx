@@ -175,7 +175,7 @@ export default function HoroscopeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CelestialBackground density="low" showConstellation={true} intensity={0.35} />
+      <CelestialBackground density="low" showConstellation={true} intensity={0.35} constellationDelay={1000} />
       {/* Top Header Navigation */}
       <View style={styles.topBar}>
         <Text style={styles.brandText}>Oria</Text>

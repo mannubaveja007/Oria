@@ -6,6 +6,7 @@ export type CelestialBackgroundProps = {
   density?: "low" | "medium" | "high";
   showConstellation?: boolean;
   intensity?: number;
+  constellationDelay?: number;
 };
 
 interface Star {
@@ -21,6 +22,7 @@ export default function CelestialBackground({
   density = "medium",
   showConstellation = false,
   intensity = 1.0,
+  constellationDelay = 4000,
 }: CelestialBackgroundProps) {
   
   // 1. Generate Star Coordinates (memoized once per density)
@@ -154,7 +156,7 @@ export default function CelestialBackground({
           Animated.timing(line3Opacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
         ]),
         // 7. Delay before next cycle starts
-        Animated.delay(4000),
+        Animated.delay(constellationDelay),
       ]).start(() => {
         if (!isCancelled) runConstellationCycle();
       });
@@ -165,7 +167,7 @@ export default function CelestialBackground({
     return () => {
       isCancelled = true;
     };
-  }, [showConstellation, intensity]);
+  }, [showConstellation, intensity, constellationDelay]);
 
   return (
     <View style={StyleSheet.absoluteFill}>
